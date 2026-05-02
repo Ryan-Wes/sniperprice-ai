@@ -30,3 +30,6 @@ Thumbs.db
 
 # Database
 backend/data/*.db
+
+
+*.txt

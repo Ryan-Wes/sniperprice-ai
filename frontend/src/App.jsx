@@ -12,6 +12,9 @@ import {
   CartesianGrid,
 } from "recharts"
 
+const API_URL = "https://sniperprice-ai-api.onrender.com"
+const N8N_WEBHOOK_URL = "https://wryan.app.n8n.cloud/webhook/sniperprice-update"
+
 function App() {
   const [products, setProducts] = useState([])
 
@@ -26,6 +29,45 @@ function App() {
     notes: ""
   })
 
+  const formatPrice = (value) => {
+    if (value === null || value === undefined) return "-"
+    return Number(value).toFixed(2).replace(".", ",")
+  }
+
+  const loadProducts = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/products`)
+      const data = await res.json()
+
+      const productsWithHistory = await Promise.all(
+        data.map(async (product) => {
+          try {
+            const historyRes = await fetch(
+              `${API_URL}/api/products/${product.id}/history`
+            )
+
+            const historyData = await historyRes.json()
+
+            return {
+              ...product,
+              history: historyData,
+            }
+          } catch (err) {
+            console.error("Erro ao buscar histórico:", err)
+
+            return {
+              ...product,
+              history: [],
+            }
+          }
+        })
+      )
+
+      setProducts(productsWithHistory)
+    } catch (err) {
+      console.error("Erro ao carregar produtos:", err)
+    }
+  }
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -56,13 +98,11 @@ function App() {
     if (!confirmDelete) return
 
     try {
-      await fetch(`https://sniperprice-ai-api.onrender.com//api/products/${id}`, {
+      await fetch(`${API_URL}/api/products/${id}`, {
         method: "DELETE"
       })
 
-      // remove do state
       setProducts((prev) => prev.filter((p) => p.id !== id))
-
     } catch (err) {
       console.error("Erro ao deletar:", err)
     }
@@ -70,29 +110,11 @@ function App() {
 
   const triggerN8nUpdate = async () => {
     try {
-      await fetch("https://wryan.app.n8n.cloud/webhook/sniperprice-update", {
+      await fetch(N8N_WEBHOOK_URL, {
         method: "POST"
       })
 
-      const res = await fetch("https://sniperprice-ai-api.onrender.com//api/products/")
-      const data = await res.json()
-
-      const productsWithHistory = await Promise.all(
-        data.map(async (product) => {
-          const historyRes = await fetch(
-            `https://sniperprice-ai-api.onrender.com//api/products/${product.id}/history`
-          )
-
-          const historyData = await historyRes.json()
-
-          return {
-            ...product,
-            history: historyData,
-          }
-        })
-      )
-
-      setProducts(productsWithHistory)
+      await loadProducts()
     } catch (err) {
       console.error("Erro ao chamar automação n8n:", err)
     }
@@ -212,9 +234,8 @@ function App() {
       let res
 
       if (editingProduct) {
-        // 🔁 MODO EDIÇÃO
         res = await fetch(
-          `https://sniperprice-ai-api.onrender.com//api/products/${editingProduct.id}`,
+          `${API_URL}/api/products/${editingProduct.id}`,
           {
             method: "PUT",
             headers: {
@@ -233,8 +254,7 @@ function App() {
           prev.map((p) => (p.id === updated.id ? { ...p, ...updated } : p))
         )
       } else {
-        // ➕ MODO CRIAÇÃO
-        res = await fetch("https://sniperprice-ai-api.onrender.com//api/products/", {
+        res = await fetch(`${API_URL}/api/products`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
@@ -259,7 +279,6 @@ function App() {
         setProducts((prev) => [newProduct, ...prev])
       }
 
-      // reset
       setShowModal(false)
       setEditingProduct(null)
 
@@ -276,51 +295,8 @@ function App() {
   }
 
   useEffect(() => {
-    const loadProducts = async () => {
-      try {
-        const res = await fetch("https://sniperprice-ai-api.onrender.com//api/products/")
-        const data = await res.json()
-
-        const productsWithHistory = await Promise.all(
-          data.map(async (product) => {
-            try {
-              const historyRes = await fetch(
-                `https://sniperprice-ai-api.onrender.com//api/products/${product.id}/history`
-              )
-              const historyData = await historyRes.json()
-
-              return {
-                ...product,
-                history: historyData,
-              }
-            } catch (err) {
-              console.error("Erro ao buscar histórico:", err)
-              return {
-                ...product,
-                history: [],
-              }
-            }
-          })
-        )
-
-        setProducts(productsWithHistory)
-      } catch (err) {
-        console.error(err)
-      }
-    }
-
     loadProducts()
   }, [])
-
-  const formatPrice = (value) => {
-    if (value === null || value === undefined) return "-"
-    return Number(value).toFixed(2).replace(".", ",")
-  }
-
-
-
-
-
 
   return (
     <main>
@@ -334,6 +310,7 @@ function App() {
           <p>
             Detecte oportunidades reais de compra com análise de preços e histórico.
           </p>
+
           <button className="add-button" onClick={() => setShowModal(true)}>
             + Adicionar produto
           </button>
@@ -427,9 +404,8 @@ function App() {
             </div>
           ))}
         </div>
-
-
       </section>
+
       {showModal && (
         <div className="modal-overlay">
           <div className="modal">

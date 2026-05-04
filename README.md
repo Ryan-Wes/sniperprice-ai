@@ -1,26 +1,27 @@
 # 🧠 SniperPrice AI
 
-SniperPrice AI is a fullstack system designed to help users decide the
-best moment to buy a product based on price behavior and historical
-analysis.
+O SniperPrice AI é um sistema fullstack criado para ajudar o usuário a
+decidir o melhor momento de compra com base no comportamento de preços
+ao longo do tempo.
 
-Instead of just tracking prices, the system analyzes trends, detects
-opportunities, and provides recommendations.
-
-------------------------------------------------------------------------
-
-## 🚀 Features
-
--   Product tracking (CRUD)
--   Price history visualization
--   Smart deal analysis (target, trend, lowest price)
--   Real-time decision suggestions
--   Integration with n8n for automated price updates
--   Interactive UI with dynamic charts
+Diferente de um simples rastreador, o sistema analisa tendências,
+identifica oportunidades e gera recomendações inteligentes.
 
 ------------------------------------------------------------------------
 
-## ⚙️ Tech Stack
+## 🚀 Funcionalidades
+
+-   Cadastro e gerenciamento de produtos (CRUD)
+-   Histórico de preços
+-   Visualização com gráficos dinâmicos
+-   Análise inteligente de compra (preço alvo, tendência, mínimo)
+-   Recomendação automática (Comprar / Observar)
+-   Integração com n8n para automação de preços
+-   Interface interativa e responsiva
+
+------------------------------------------------------------------------
+
+## ⚙️ Tecnologias
 
 ### Frontend
 
@@ -32,42 +33,43 @@ opportunities, and provides recommendations.
 -   FastAPI
 -   SQLite
 
-### Automation
+### Automação
 
--   n8n (webhook-based price updates)
-
-------------------------------------------------------------------------
-
-## ⚡ How it works
-
-1.  User registers a product with a target price\
-2.  The system stores price updates over time\
-3.  n8n triggers automated price updates via webhook\
-4.  Backend saves history and recalculates deal status\
-5.  Frontend displays analysis and recommendation
+-   n8n (via webhook)
 
 ------------------------------------------------------------------------
 
-## 🧠 Project Goal
+## ⚡ Como funciona
 
-The goal of this project is to simulate a real-world price monitoring
-system with decision-making logic and automation pipelines, serving as a
-foundation for future integrations with real data sources (APIs or web
-scraping).
-
-------------------------------------------------------------------------
-
-## 🔮 Future Improvements
-
--   Real price scraping from e-commerce websites
--   Notification system (alerts when price drops)
--   Multi-user support
--   Deployment in production environment
+1.  O usuário cadastra um produto com preço alvo\
+2.  O sistema armazena atualizações de preço ao longo do tempo\
+3.  O n8n dispara atualizações automáticas via webhook\
+4.  O backend salva o histórico e recalcula o status\
+5.  O frontend exibe análise e recomendação em tempo real
 
 ------------------------------------------------------------------------
 
-## 🎯 Key Concept
+## 🧠 Objetivo do projeto
 
-This is not just a price tracker.
+Simular um sistema real de monitoramento de preços com foco em tomada de
+decisão, incluindo automação e análise de dados.
 
-It is a decision-making system.
+A arquitetura já está preparada para integração futura com fontes reais
+(APIs ou scraping).
+
+------------------------------------------------------------------------
+
+## 🔮 Melhorias futuras
+
+-   Integração com scraping de e-commerces
+-   Sistema de notificações (queda de preço)
+-   Suporte a múltiplos usuários
+-   Deploy em produção
+
+------------------------------------------------------------------------
+
+## 🎯 Conceito principal
+
+Este não é apenas um rastreador de preços.
+
+É um sistema de decisão de compra.

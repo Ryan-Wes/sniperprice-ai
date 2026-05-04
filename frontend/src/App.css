@@ -351,3 +351,29 @@ p {
   font-size: 11px;
   font-weight: 700;
 }
+
+.edit-button {
+  margin-top: 10px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-muted);
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.delete-button {
+  margin-top: 6px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 80, 80, 0.3);
+  background: transparent;
+  color: #ff5050;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.delete-button:hover {
+  background: rgba(255, 80, 80, 0.1);
+}

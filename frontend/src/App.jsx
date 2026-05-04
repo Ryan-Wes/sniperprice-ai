@@ -16,6 +16,7 @@ function App() {
   const [products, setProducts] = useState([])
 
   const [showModal, setShowModal] = useState(false)
+  const [editingProduct, setEditingProduct] = useState(null)
 
   const [formData, setFormData] = useState({
     name: "",
@@ -33,6 +34,38 @@ function App() {
       ...prev,
       [name]: value
     }))
+  }
+
+  const handleEdit = (product) => {
+    setEditingProduct(product)
+
+    setFormData({
+      name: product.name,
+      url: product.url,
+      store: product.store,
+      target_price: product.target_price,
+      notes: product.notes || ""
+    })
+
+    setShowModal(true)
+  }
+
+  const handleDelete = async (id) => {
+    const confirmDelete = confirm("Tem certeza que quer deletar?")
+
+    if (!confirmDelete) return
+
+    try {
+      await fetch(`http://127.0.0.1:8000/api/products/${id}`, {
+        method: "DELETE"
+      })
+
+      // remove do state
+      setProducts((prev) => prev.filter((p) => p.id !== id))
+
+    } catch (err) {
+      console.error("Erro ao deletar:", err)
+    }
   }
 
   const analyzeDeal = (product) => {
@@ -54,12 +87,73 @@ function App() {
     const lowestPrice = prices.length > 0 ? Math.min(...prices) : currentPrice
     const isLowestPrice = currentPrice <= lowestPrice
 
+    let proximityToLowest = 0
+
+    if (lowestPrice > 0) {
+      proximityToLowest = ((currentPrice - lowestPrice) / lowestPrice) * 100
+    }
+
+    let hasContinuousDrop = false
+    let hasContinuousRise = false
+
+    if (prices.length >= 3) {
+      const recent = prices.slice(-3)
+
+      hasContinuousDrop = recent.every((price, index) => {
+        if (index === 0) return true
+        return price < recent[index - 1]
+      })
+
+      hasContinuousRise = recent.every((price, index) => {
+        if (index === 0) return true
+        return price > recent[index - 1]
+      })
+    }
+
+    let trend = "Sem dados"
+
+    if (prices.length >= 3) {
+      const recent = prices.slice(-3)
+
+      const first = recent[0]
+      const last = recent[recent.length - 1]
+
+      const change = ((last - first) / first) * 100
+
+      if (hasContinuousDrop) {
+        trend = "Queda contínua"
+      } else if (hasContinuousRise) {
+        trend = "Alta contínua"
+      } else if (change < -3) {
+        trend = "Tendência de queda"
+      } else if (change > 3) {
+        trend = "Tendência de alta"
+      } else {
+        trend = "Preço estável"
+      }
+    } else if (prices.length >= 2) {
+      const last = prices[prices.length - 1]
+      const previous = prices[prices.length - 2]
+
+      if (last < previous) {
+        trend = "Tendência de queda"
+      } else if (last > previous) {
+        trend = "Tendência de alta"
+      } else {
+        trend = "Preço estável"
+      }
+    }
+
     if (currentPrice <= targetPrice) {
       return {
         label: "Comprar agora",
         message: isLowestPrice
-          ? `Melhor preço registrado até agora (R$ ${formatPrice(currentPrice)})`
-          : `Está R$ ${formatPrice(Math.abs(difference))} abaixo do alvo (mínimo: R$ ${formatPrice(lowestPrice)})`
+          ? `Melhor preço até agora. ${trend}.`
+          : proximityToLowest <= 3
+            ? `Muito próximo do menor preço (${formatPrice(lowestPrice)}). ${trend}.`
+            : trend.includes("Subiu")
+              ? `Já esteve mais barato (mín: R$ ${formatPrice(lowestPrice)}). ${trend}.`
+              : `Abaixo do alvo, mas ainda distante do mínimo (R$ ${formatPrice(lowestPrice)}). ${trend}.`
       }
     }
 
@@ -70,16 +164,14 @@ function App() {
       if (priceDrop > 0 && percentageFromTarget <= 10) {
         return {
           label: "Quase no alvo",
-          message: `Caiu R$ ${formatPrice(priceDrop)} recentemente, mas ainda está acima do alvo.`,
-          lowestPrice,
-          isLowestPrice
+          message: `Quase no alvo. ${trend}.`
         }
       }
     }
 
     return {
       label: "Observar",
-      message: `Está ${percentageFromTarget.toFixed(1).replace(".", ",")}% acima do alvo (mínimo: R$ ${formatPrice(lowestPrice)})`
+      message: `${percentageFromTarget.toFixed(1).replace(".", ",")}% acima do alvo (mín: R$ ${formatPrice(lowestPrice)}). ${trend}.`
     }
   }
 
@@ -87,36 +179,60 @@ function App() {
     e.preventDefault()
 
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/products/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          ...formData,
-          target_price: Number(formData.target_price)
+      let res
+
+      if (editingProduct) {
+        // 🔁 MODO EDIÇÃO
+        res = await fetch(
+          `http://127.0.0.1:8000/api/products/${editingProduct.id}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              ...formData,
+              target_price: Number(formData.target_price)
+            })
+          }
+        )
+
+        const updated = await res.json()
+
+        setProducts((prev) =>
+          prev.map((p) => (p.id === updated.id ? { ...p, ...updated } : p))
+        )
+      } else {
+        // ➕ MODO CRIAÇÃO
+        res = await fetch("http://127.0.0.1:8000/api/products/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            ...formData,
+            target_price: Number(formData.target_price)
+          })
         })
-      })
 
-      const data = await res.json()
+        const data = await res.json()
 
-      // 👉 monta o novo produto manualmente
-      const newProduct = {
-        id: data.product_id,
-        ...formData,
-        current_price: null,
-        previous_price: null,
-        status: "observing",
-        history: []
+        const newProduct = {
+          id: data.product_id,
+          ...formData,
+          current_price: null,
+          previous_price: null,
+          status: "observing",
+          history: []
+        }
+
+        setProducts((prev) => [newProduct, ...prev])
       }
 
-      // 👉 atualiza lista SEM reload
-      setProducts((prev) => [newProduct, ...prev])
-
-      // fecha modal
+      // reset
       setShowModal(false)
+      setEditingProduct(null)
 
-      // limpa form
       setFormData({
         name: "",
         url: "",
@@ -124,9 +240,8 @@ function App() {
         target_price: "",
         notes: ""
       })
-
     } catch (err) {
-      console.error("Erro ao criar produto:", err)
+      console.error("Erro:", err)
     }
   }
 
@@ -250,9 +365,21 @@ function App() {
                     <div className="deal-analysis">
                       <strong>{dealAnalysis.label}</strong>
                       <p>{dealAnalysis.message}</p>
-
-                      
                     </div>
+
+                    <button
+                      className="edit-button"
+                      onClick={() => handleEdit(product)}
+                    >
+                      Editar
+                    </button>
+
+                    <button
+                      className="delete-button"
+                      onClick={() => handleDelete(product.id)}
+                    >
+                      Deletar
+                    </button>
                   </>
                 )
               })()}
@@ -265,7 +392,7 @@ function App() {
       {showModal && (
         <div className="modal-overlay">
           <div className="modal">
-            <h2>Novo produto</h2>
+            <h2>{editingProduct ? "Editar produto" : "Novo produto"}</h2>
 
             <form onSubmit={handleSubmit}>
               <input

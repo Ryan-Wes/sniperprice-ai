@@ -56,7 +56,7 @@ function App() {
     if (!confirmDelete) return
 
     try {
-      await fetch(`https://ipad-enjoyably-arrange.ngrok-free.dev/api/products/${id}`, {
+      await fetch(`https://sniperprice-ai-api.onrender.com//api/products/${id}`, {
         method: "DELETE"
       })
 
@@ -74,13 +74,13 @@ function App() {
         method: "POST"
       })
 
-      const res = await fetch("https://ipad-enjoyably-arrange.ngrok-free.dev/api/products/")
+      const res = await fetch("https://sniperprice-ai-api.onrender.com//api/products/")
       const data = await res.json()
 
       const productsWithHistory = await Promise.all(
         data.map(async (product) => {
           const historyRes = await fetch(
-            `https://ipad-enjoyably-arrange.ngrok-free.dev/api/products/${product.id}/history`
+            `https://sniperprice-ai-api.onrender.com//api/products/${product.id}/history`
           )
 
           const historyData = await historyRes.json()
@@ -214,7 +214,7 @@ function App() {
       if (editingProduct) {
         // 🔁 MODO EDIÇÃO
         res = await fetch(
-          `https://ipad-enjoyably-arrange.ngrok-free.dev/api/products/${editingProduct.id}`,
+          `https://sniperprice-ai-api.onrender.com//api/products/${editingProduct.id}`,
           {
             method: "PUT",
             headers: {
@@ -234,7 +234,7 @@ function App() {
         )
       } else {
         // ➕ MODO CRIAÇÃO
-        res = await fetch("https://ipad-enjoyably-arrange.ngrok-free.dev/api/products/", {
+        res = await fetch("https://sniperprice-ai-api.onrender.com//api/products/", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
@@ -278,14 +278,14 @@ function App() {
   useEffect(() => {
     const loadProducts = async () => {
       try {
-        const res = await fetch("https://ipad-enjoyably-arrange.ngrok-free.dev/api/products/")
+        const res = await fetch("https://sniperprice-ai-api.onrender.com//api/products/")
         const data = await res.json()
 
         const productsWithHistory = await Promise.all(
           data.map(async (product) => {
             try {
               const historyRes = await fetch(
-                `https://ipad-enjoyably-arrange.ngrok-free.dev/api/products/${product.id}/history`
+                `https://sniperprice-ai-api.onrender.com//api/products/${product.id}/history`
               )
               const historyData = await historyRes.json()
 

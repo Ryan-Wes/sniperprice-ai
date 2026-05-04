@@ -56,7 +56,7 @@ function App() {
     if (!confirmDelete) return
 
     try {
-      await fetch(`http://127.0.0.1:8000/api/products/${id}`, {
+      await fetch(`https://ipad-enjoyably-arrange.ngrok-free.dev/api/products/${id}`, {
         method: "DELETE"
       })
 
@@ -74,13 +74,13 @@ function App() {
         method: "POST"
       })
 
-      const res = await fetch("http://127.0.0.1:8000/api/products/")
+      const res = await fetch("https://ipad-enjoyably-arrange.ngrok-free.dev/api/products/")
       const data = await res.json()
 
       const productsWithHistory = await Promise.all(
         data.map(async (product) => {
           const historyRes = await fetch(
-            `http://127.0.0.1:8000/api/products/${product.id}/history`
+            `https://ipad-enjoyably-arrange.ngrok-free.dev/api/products/${product.id}/history`
           )
 
           const historyData = await historyRes.json()
@@ -214,7 +214,7 @@ function App() {
       if (editingProduct) {
         // 🔁 MODO EDIÇÃO
         res = await fetch(
-          `http://127.0.0.1:8000/api/products/${editingProduct.id}`,
+          `https://ipad-enjoyably-arrange.ngrok-free.dev/api/products/${editingProduct.id}`,
           {
             method: "PUT",
             headers: {
@@ -234,7 +234,7 @@ function App() {
         )
       } else {
         // ➕ MODO CRIAÇÃO
-        res = await fetch("http://127.0.0.1:8000/api/products/", {
+        res = await fetch("https://ipad-enjoyably-arrange.ngrok-free.dev/api/products/", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
@@ -278,14 +278,14 @@ function App() {
   useEffect(() => {
     const loadProducts = async () => {
       try {
-        const res = await fetch("http://127.0.0.1:8000/api/products/")
+        const res = await fetch("https://ipad-enjoyably-arrange.ngrok-free.dev/api/products/")
         const data = await res.json()
 
         const productsWithHistory = await Promise.all(
           data.map(async (product) => {
             try {
               const historyRes = await fetch(
-                `http://127.0.0.1:8000/api/products/${product.id}/history`
+                `https://ipad-enjoyably-arrange.ngrok-free.dev/api/products/${product.id}/history`
               )
               const historyData = await historyRes.json()
 

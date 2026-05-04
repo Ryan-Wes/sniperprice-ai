@@ -68,6 +68,36 @@ function App() {
     }
   }
 
+  const triggerN8nUpdate = async () => {
+    try {
+      await fetch("https://wryan.app.n8n.cloud/webhook/sniperprice-update", {
+        method: "POST"
+      })
+
+      const res = await fetch("http://127.0.0.1:8000/api/products/")
+      const data = await res.json()
+
+      const productsWithHistory = await Promise.all(
+        data.map(async (product) => {
+          const historyRes = await fetch(
+            `http://127.0.0.1:8000/api/products/${product.id}/history`
+          )
+
+          const historyData = await historyRes.json()
+
+          return {
+            ...product,
+            history: historyData,
+          }
+        })
+      )
+
+      setProducts(productsWithHistory)
+    } catch (err) {
+      console.error("Erro ao chamar automação n8n:", err)
+    }
+  }
+
   const analyzeDeal = (product) => {
     const currentPrice = Number(product.current_price)
     const targetPrice = Number(product.target_price)
@@ -288,6 +318,10 @@ function App() {
   }
 
 
+
+
+
+
   return (
     <main>
       <section className="hero">
@@ -302,6 +336,10 @@ function App() {
           </p>
           <button className="add-button" onClick={() => setShowModal(true)}>
             + Adicionar produto
+          </button>
+
+          <button className="add-button n8n-button" onClick={triggerN8nUpdate}>
+            ⚡ Atualizar via n8n
           </button>
         </div>
       </section>
@@ -353,13 +391,16 @@ function App() {
                             strokeWidth={3}
                             dot={{ r: 3, fill: "var(--color-primary)" }}
                             activeDot={{ r: 5 }}
+                            isAnimationActive={true}
+                            animationDuration={900}
+                            animationEasing="ease-out"
                           />
                         </LineChart>
                       </ResponsiveContainer>
                     </div>
 
                     <span className={`status ${product.status}`}>
-                      {product.status}
+                      {product.status === "good_deal" ? "🔥 Boa oportunidade" : "👀 Observando"}
                     </span>
 
                     <div className="deal-analysis">

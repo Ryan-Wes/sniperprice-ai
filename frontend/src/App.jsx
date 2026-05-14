@@ -108,15 +108,25 @@ function App() {
     }
   }
 
-  const triggerN8nUpdate = async () => {
-    try {
-      await fetch(N8N_WEBHOOK_URL, {
-        method: "POST"
-      })
+  const [isScraping, setIsScraping] = useState(false)
+  const [scrapeResult, setScrapeResult] = useState(null)
 
+  const scrapeAllPrices = async () => {
+    setIsScraping(true)
+    setScrapeResult(null)
+    try {
+      const res = await fetch(`${API_URL}/api/products/scrape-all`, { method: "POST" })
+      const data = await res.json()
+      if (data.total !== undefined) {
+        setScrapeResult(`${data.success}/${data.total} preços atualizados`)
+      } else {
+        setScrapeResult("Erro ao buscar preços")
+      }
       await loadProducts()
     } catch (err) {
-      console.error("Erro ao chamar automação n8n:", err)
+      setScrapeResult("Erro ao buscar preços")
+    } finally {
+      setIsScraping(false)
     }
   }
 
@@ -315,9 +325,10 @@ function App() {
             + Adicionar produto
           </button>
 
-          <button className="add-button n8n-button" onClick={triggerN8nUpdate}>
-            ⚡ Atualizar via n8n
+          <button className="add-button n8n-button" onClick={scrapeAllPrices} disabled={isScraping}>
+            {isScraping ? "Buscando..." : "🔍 Buscar preços reais"}
           </button>
+          {scrapeResult && <p className="scrape-result">{scrapeResult}</p>}
         </div>
       </section>
 
@@ -340,7 +351,7 @@ function App() {
                     </div>
 
                     <div className="mini-chart">
-                      <ResponsiveContainer width="100%" height="100%">
+                      <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                         <LineChart data={product.history ?? []}>
                           <CartesianGrid
                             vertical={false}

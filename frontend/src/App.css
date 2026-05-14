@@ -258,6 +258,7 @@ p {
 
 .mini-chart {
   width: 100%;
+  min-width: 0;
   height: 56px;
   margin: 10px 0 14px;
   filter: drop-shadow(0 0 8px rgba(158, 230, 31, 0.12));
@@ -434,6 +435,19 @@ p {
 
 .n8n-button:hover {
   transform: translateY(-2px);
+}
+
+.n8n-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.scrape-result {
+  font-size: 0.82rem;
+  color: var(--color-primary);
+  margin-top: 8px;
+  text-align: center;
 }
 
 @keyframes analysisGlow {

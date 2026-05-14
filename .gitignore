@@ -28,8 +28,9 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Database
-backend/data/*.db
+# Database e dados locais
+backend/data/
+backend/get_token.py
 
 
 comandos-terminal.txt

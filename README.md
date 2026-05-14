@@ -1,75 +1,87 @@
 # 🧠 SniperPrice AI
 
-O SniperPrice AI é um sistema fullstack criado para ajudar o usuário a
-decidir o melhor momento de compra com base no comportamento de preços
-ao longo do tempo.
+SniperPrice AI is a fullstack system that helps users decide the best time to buy a product based on real price behavior over time.
 
-Diferente de um simples rastreador, o sistema analisa tendências,
-identifica oportunidades e gera recomendações inteligentes.
+More than a simple price tracker — it analyzes trends, identifies opportunities and generates intelligent buy recommendations.
 
-------------------------------------------------------------------------
+---
 
-## 🚀 Funcionalidades
+## 🚀 Features
 
--   Cadastro e gerenciamento de produtos (CRUD)
--   Histórico de preços
--   Visualização com gráficos dinâmicos
--   Análise inteligente de compra (preço alvo, tendência, mínimo)
--   Recomendação automática (Comprar / Observar)
--   Integração com n8n para automação de preços
--   Interface interativa e responsiva
+- Product registration and management (CRUD)
+- **Real price scraping** from e-commerce URLs (Kabum, Amazon, and others)
+- **Mercado Livre integration** via official OAuth API
+- Price history with dynamic charts
+- Intelligent buy analysis (target price, trend, historical minimum)
+- Automatic recommendation: **Buy Now / Watch**
+- Responsive and interactive interface
 
-------------------------------------------------------------------------
+---
 
-## ⚙️ Tecnologias
+## ⚙️ Tech Stack
 
 ### Frontend
+- React
+- Recharts
 
--   React
--   Recharts
+### Backend
+- FastAPI
+- SQLite
+- httpx + BeautifulSoup4 (scraping)
+
+---
+
+## ⚡ How it works
+
+1. User registers a product with a target price and the product URL
+2. Clicking **"Buscar preços reais"** triggers real scraping of the product page
+3. The backend extracts the price via HTML parsing or ML's official API (OAuth)
+4. The price history is saved and the status is recalculated
+5. The frontend displays the analysis and recommendation in real time
+
+---
+
+## 🔌 Price extraction strategy
+
+| Source | Method |
+|---|---|
+| Mercado Livre | Official API with OAuth 2.0 (Authorization Code + Client Credentials) |
+| Kabum, Amazon, others | HTML scraping with JSON-LD, meta tags and CSS selectors |
+
+---
+
+## 🛠️ Local setup
 
 ### Backend
 
--   FastAPI
--   SQLite
+```bash
+cd backend
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+```
 
-### Automação
+Create a `.env` in `backend/`:
 
--   n8n (via webhook)
+```
+ML_CLIENT_ID=your_ml_app_id
+ML_CLIENT_SECRET=your_ml_secret
+ML_ACCESS_TOKEN=your_ml_user_token
+```
 
-------------------------------------------------------------------------
+### Frontend
 
-## ⚡ Como funciona
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-1.  O usuário cadastra um produto com preço alvo\
-2.  O sistema armazena atualizações de preço ao longo do tempo\
-3.  O n8n dispara atualizações automáticas via webhook\
-4.  O backend salva o histórico e recalcula o status\
-5.  O frontend exibe análise e recomendação em tempo real
+---
 
-------------------------------------------------------------------------
+## 🎯 Core concept
 
-## 🧠 Objetivo do projeto
+This is not just a price tracker.
 
-Simular um sistema real de monitoramento de preços com foco em tomada de
-decisão, incluindo automação e análise de dados.
-
-A arquitetura já está preparada para integração futura com fontes reais
-(APIs ou scraping).
-
-------------------------------------------------------------------------
-
-## 🔮 Melhorias futuras
-
--   Integração com scraping de e-commerces
--   Sistema de notificações (queda de preço)
--   Suporte a múltiplos usuários
--   Deploy em produção
-
-------------------------------------------------------------------------
-
-## 🎯 Conceito principal
-
-Este não é apenas um rastreador de preços.
-
-É um sistema de decisão de compra.
+It's a **purchase decision system**.

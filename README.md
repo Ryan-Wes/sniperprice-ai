@@ -10,10 +10,11 @@ More than a simple price tracker — it analyzes trends, identifies opportunitie
 
 - Product registration and management (CRUD)
 - **Real price scraping** from e-commerce URLs (Kabum, Amazon, and others)
-- **Mercado Livre integration** via official OAuth API
+- **Mercado Livre integration** via official OAuth 2.0 API
 - Price history with dynamic charts
 - Intelligent buy analysis (target price, trend, historical minimum)
 - Automatic recommendation: **Buy Now / Watch**
+- **Automated price updates** via n8n scheduled workflows
 - Responsive and interactive interface
 
 ---
@@ -29,6 +30,9 @@ More than a simple price tracker — it analyzes trends, identifies opportunitie
 - SQLite
 - httpx + BeautifulSoup4 (scraping)
 
+### Automation
+- n8n (scheduled price update workflow)
+
 ---
 
 ## ⚡ How it works
@@ -38,6 +42,7 @@ More than a simple price tracker — it analyzes trends, identifies opportunitie
 3. The backend extracts the price via HTML parsing or ML's official API (OAuth)
 4. The price history is saved and the status is recalculated
 5. The frontend displays the analysis and recommendation in real time
+6. An **n8n workflow** runs on a schedule, automatically scraping all products and keeping prices up to date
 
 ---
 
@@ -47,6 +52,14 @@ More than a simple price tracker — it analyzes trends, identifies opportunitie
 |---|---|
 | Mercado Livre | Official API with OAuth 2.0 (Authorization Code + Client Credentials) |
 | Kabum, Amazon, others | HTML scraping with JSON-LD, meta tags and CSS selectors |
+
+---
+
+## 🤖 Automation (n8n)
+
+A scheduled n8n workflow hits `POST /api/products/scrape-all` at regular intervals, triggering real price scraping for all registered products automatically — no manual action needed.
+
+The workflow includes retry logic to handle cold starts from the free-tier backend hosting.
 
 ---
 
@@ -77,6 +90,13 @@ cd frontend
 npm install
 npm run dev
 ```
+
+---
+
+## 🌐 Deploy
+
+- **Backend**: hosted on [Render](https://render.com)
+- **Frontend**: hosted on [Vercel](https://vercel.com)
 
 ---
 
